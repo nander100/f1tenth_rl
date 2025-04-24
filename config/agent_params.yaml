@@ -20,10 +20,10 @@ rl_agent:
     
     # Reward components weights
     collision_penalty: -200.0
-    speed_reward_weight: 0.5
-    steering_penalty_weight: -4.0
+    speed_reward_weight: 0.3
+    steering_penalty_weight: -10.0
     progress_reward_weight: 10.0
-    centerline_reward_weight: 100.0
+    centerline_reward_weight: 12.0
 
     # Car starting position
     start_x: 0.0
