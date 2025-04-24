@@ -44,7 +44,7 @@ class RLAgentNode(Node):
             Odometry, '/ego_racecar/odom', self.odom_callback, 10)
         
         # RL environment setup
-        self.env = F1TenthEnv()
+        self.env = F1TenthEnv(node=self)
         
         # Store the latest observations
         self.latest_scan = None
