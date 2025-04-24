@@ -64,6 +64,20 @@ class RLAgentNode(Node):
         self.max_steps_per_episode = 1000
         
         self.get_logger().info('RL Agent Node initialized')
+
+        # Initialize environment with reference to this node
+        self.env = F1TenthEnv(node=self)
+        
+        # Store starting position from parameters
+        self.declare_parameter('start_x', 0.0)
+        self.declare_parameter('start_y', 0.0)
+        self.declare_parameter('start_yaw', 0.0)
+        
+        self.env.start_position = [
+            self.get_parameter('start_x').value,
+            self.get_parameter('start_y').value,
+            self.get_parameter('start_yaw').value
+        ]
     
     def initialize_agent(self):
         """Initialize the RL agent based on specified model type"""
@@ -185,10 +199,14 @@ class RLAgentNode(Node):
             # Train the agent
             if len(self.agent.replay_buffer) > self.agent.batch_size:
                 self.agent.train()
+
+
             
             # Check if episode is done
             if done or self.episode_steps >= self.max_steps_per_episode:
                 self.episodes_completed += 1
+                self.env.reset_car_position()
+                self.get_logger().info("Collision detected! Resetting car position.")
                 
                 # Log episode stats
                 self.get_logger().info(
