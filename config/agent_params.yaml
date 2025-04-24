@@ -11,12 +11,12 @@ rl_agent:
     
     # DQN parameters
     hidden_dim: 256
-    learning_rate: 0.0003
+    learning_rate: 0.0001
     batch_size: 64
-    gamma: 0.99              # Discount factor
+    gamma: 0.98              # Discount factor
     epsilon_start: 1.0       # Starting exploration rate
     epsilon_end: 0.05        # Minimum exploration rate
-    epsilon_decay: 0.995     # Decay rate for exploration
+    epsilon_decay: 0.99     # Decay rate for exploration
     
     # Reward components weights
     collision_penalty: -200.0
