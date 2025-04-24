@@ -5,6 +5,8 @@ import math
 from geometry_msgs.msg import Pose, Twist
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
+from geometry_msgs.msg import PoseWithCovarianceStamped
+import time
 
 class F1TenthEnv:
     """
@@ -29,6 +31,46 @@ class F1TenthEnv:
         # Episode tracking
         self.episode_step = 0
         self.max_episode_steps = 1000
+
+        # Store the starting position
+        self.start_position = [0.0, 0.0, 0.0]  # [x, y, theta]
+        if node:
+            self.reset_pub = node.create_publisher(
+                PoseWithCovarianceStamped, 
+                '/initialpose', 
+                10
+            )
+
+    def reset_car_position(self):
+        """Reset the car to its starting position"""
+        if not hasattr(self, 'reset_pub'):
+            return False
+            
+        # Create the pose message
+        pose_msg = PoseWithCovarianceStamped()
+        pose_msg.header.frame_id = 'map'
+        pose_msg.header.stamp.sec = int(time.time())
+        
+        # Set position (x, y, z)
+        pose_msg.pose.pose.position.x = self.start_position[0]
+        pose_msg.pose.pose.position.y = self.start_position[1]
+        pose_msg.pose.pose.position.z = 0.0
+        
+        # Set orientation (as quaternion from yaw)
+        from tf_transformations import quaternion_from_euler
+        q = quaternion_from_euler(0, 0, self.start_position[2])
+        pose_msg.pose.pose.orientation.x = q[0]
+        pose_msg.pose.pose.orientation.y = q[1]
+        pose_msg.pose.pose.orientation.z = q[2]
+        pose_msg.pose.pose.orientation.w = q[3]
+        
+        # Publish the pose
+        self.reset_pub.publish(pose_msg)
+        
+        # Sleep a bit to let the simulator respond
+        time.sleep(0.5)
+        
+        return True
     
     def reset(self):
         """Reset environment state at the beginning of an episode"""
