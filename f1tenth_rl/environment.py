@@ -12,7 +12,7 @@ class F1TenthEnv:
     """
     Environment class that handles interaction with the F1TENTH simulator
     """
-    def __init__(self):
+    def __init__(self, node=None):
         # Track dimensions (approximate values for typical F1TENTH tracks)
         self.track_width = 2.0  # meters
         
@@ -37,6 +37,7 @@ class F1TenthEnv:
         
         # Store the starting position
         self.start_position = [0.0, 0.0, 0.0]  # [x, y, theta]
+        
         # Create reset publisher if node is provided
         if self.node is not None:
             from geometry_msgs.msg import PoseWithCovarianceStamped
