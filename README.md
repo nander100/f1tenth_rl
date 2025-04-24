@@ -100,10 +100,6 @@ You can modify the reward function by:
 1. Editing the `calculate_reward` function in `utils/rewards.py`
 2. Adjusting reward component weights in the parameter file
 
-## License
-
-MIT License
-
 ## References
 
 - F1TENTH Gym: https://github.com/f1tenth/f1tenth_gym
