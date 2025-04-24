@@ -24,6 +24,7 @@ docker run -it \
 cd /sim_ws/src
 git clone https://github.com/nander100/f1tenth_rl.git
 cd ..
+pip install torch numpy matplotlib
 colcon build --packages-select f1tenth_rl
 ```
 
@@ -33,42 +34,11 @@ source /opt/ros/foxy/setup.bash
 source install/local_setup.bash
 ros2 launch f1tenth_gym_ros gym_bridge_launch.py
 ```
-5.  Open a new terminal and run
+5.  Open a new terminal, run the docker image and run
 
 ```bash
-
+docker exec -it <CONTAINER_ID> /bin/bash
+ros2 launch f1tenth_rl rl_agent_launch.py training_mode:=true model_type:=dqn
+ros2 launch f1tenth_rl rl_agent_launch.py training_mode:=true model_type:=dqn
 ```
 
-## Monitoring Training Progress
-
-You can create monitoring scripts to track the training progress. A simple approach is to save episode rewards and plot them:
-
-```python
-import matplotlib.pyplot as plt
-import numpy as np
-import os
-
-def plot_rewards(rewards_file, save_path):
-    rewards = np.loadtxt(rewards_file)
-    plt.figure(figsize=(10, 6))
-    plt.plot(rewards)
-    plt.xlabel('Episode')
-    plt.ylabel('Total Reward')
-    plt.title('Training Progress')
-    plt.savefig(save_path)
-    plt.close()
-
-if __name__ == "__main__":
-    plot_rewards('rewards.txt', 'training_progress.png')
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Display not working in Docker**: Make sure you've run `xhost +local:` before starting the container.
-
-2. **Package not found**: Ensure you've sourced the workspace setup file:
-```bash
-source ~/f1tenth_ws/install/setup.bash
-```
