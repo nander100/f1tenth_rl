@@ -19,11 +19,11 @@ rl_agent:
     epsilon_decay: 0.995     # Decay rate for exploration
     
     # Reward components weights
-    collision_penalty: -100.0
-    speed_reward_weight: 1.0
-    steering_penalty_weight: -0.5
-    progress_reward_weight: 5.0
-    centerline_reward_weight: 0.5
+    collision_penalty: -200.0
+    speed_reward_weight: 0.5
+    steering_penalty_weight: -1.0
+    progress_reward_weight: 10.0
+    centerline_reward_weight: 4.0
 
     # Car starting position
     start_x: 0.0
