@@ -12,14 +12,6 @@ This package provides a framework for implementing reinforcement learning agents
 - Customizable reward functions
 - Tools for training and evaluation
 
-## Requirements
-
-- ROS2 Foxy
-- F1TENTH Gym and F1TENTH Gym ROS Bridge
-- Python 3.6+
-- PyTorch
-- NumPy
-
 ## Installation
 See setup.md
 
