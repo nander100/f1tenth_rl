@@ -1,23 +1,13 @@
 # F1TENTH RL Package Setup Guide
 
-This guide walks you through setting up the F1TENTH reinforcement learning package from scratch.
-
-## Prerequisites
-
-- Ubuntu 20.04
-- ROS2 Foxy
-- F1TENTH Gym
-- F1TENTH Gym ROS Bridge
-- NVIDIA GPU (recommended but not required)
 
 ## Step 1: Install ROS2 Foxy
 
 Follow the official ROS2 installation instructions: https://docs.ros.org/en/foxy/Installation.html
 
-## Step 2: Create a ROS2 Workspace
+## Step 1: Go to /src
 
 ```bash
-mkdir -p ~/f1tenth_ws/src
 cd ~/f1tenth_ws/src
 ```
 
