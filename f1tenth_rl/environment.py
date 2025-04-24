@@ -32,12 +32,17 @@ class F1TenthEnv:
         self.episode_step = 0
         self.max_episode_steps = 1000
 
+        # Store node reference for reset functionality
+        self.node = node
+        
         # Store the starting position
         self.start_position = [0.0, 0.0, 0.0]  # [x, y, theta]
-        if node:
-            self.reset_pub = node.create_publisher(
-                PoseWithCovarianceStamped, 
-                '/initialpose', 
+        # Create reset publisher if node is provided
+        if self.node is not None:
+            from geometry_msgs.msg import PoseWithCovarianceStamped
+            self.reset_pub = self.node.create_publisher(
+                PoseWithCovarianceStamped,
+                '/initialpose',
                 10
             )
 
