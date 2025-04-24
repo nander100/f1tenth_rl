@@ -23,6 +23,9 @@ class RLAgentNode(Node):
         self.declare_parameter('model_type', 'dqn')
         self.declare_parameter('model_path', '')
         self.declare_parameter('save_path', 'models/')
+        self.declare_parameter('start_x', 0.0)
+        self.declare_parameter('start_y', 0.0)
+        self.declare_parameter('start_yaw', 0.0)
         
         # Get parameters
         self.training_mode = self.get_parameter('training_mode').value
@@ -43,13 +46,20 @@ class RLAgentNode(Node):
         self.odom_sub = self.create_subscription(
             Odometry, '/ego_racecar/odom', self.odom_callback, 10)
         
-        # RL environment setup
-        self.env = F1TenthEnv(node=self)
-        
         # Store the latest observations
         self.latest_scan = None
         self.latest_odom = None
         self.prev_odom = None
+        
+        # Initialize environment with reference to this node
+        self.env = F1TenthEnv(node=self)
+        
+        # Set starting position from parameters
+        self.env.start_position = [
+            self.get_parameter('start_x').value,
+            self.get_parameter('start_y').value,
+            self.get_parameter('start_yaw').value
+        ]
         
         # Initialize RL agent
         self.initialize_agent()
@@ -64,20 +74,6 @@ class RLAgentNode(Node):
         self.max_steps_per_episode = 1000
         
         self.get_logger().info('RL Agent Node initialized')
-
-        # Initialize environment with reference to this node
-        self.env = F1TenthEnv(node=self)
-        
-        # Store starting position from parameters
-        self.declare_parameter('start_x', 0.0)
-        self.declare_parameter('start_y', 0.0)
-        self.declare_parameter('start_yaw', 0.0)
-        
-        self.env.start_position = [
-            self.get_parameter('start_x').value,
-            self.get_parameter('start_y').value,
-            self.get_parameter('start_yaw').value
-        ]
     
     def initialize_agent(self):
         """Initialize the RL agent based on specified model type"""
@@ -95,7 +91,6 @@ class RLAgentNode(Node):
             )
             
             # Define our discrete action space
-            # [steering_angle, velocity]
             self.actions = []
             for steering in np.linspace(-0.4, 0.4, 5):  # -0.4 to 0.4 rad
                 for velocity in [1.0, 2.0, 3.0]:  # m/s
@@ -199,14 +194,12 @@ class RLAgentNode(Node):
             # Train the agent
             if len(self.agent.replay_buffer) > self.agent.batch_size:
                 self.agent.train()
-
-
             
             # Check if episode is done
             if done or self.episode_steps >= self.max_steps_per_episode:
                 self.episodes_completed += 1
                 self.env.reset_car_position()
-                self.get_logger().info("Collision detected! Resetting car position.")
+                self.get_logger().info("Episode ended! Resetting car position.")
                 
                 # Log episode stats
                 self.get_logger().info(
