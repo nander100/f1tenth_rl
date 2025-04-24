@@ -21,36 +21,21 @@ This package provides a framework for implementing reinforcement learning agents
 - NumPy
 
 ## Installation
-
-1. Make sure you have the F1TENTH simulator installed (follow the instructions at https://github.com/f1tenth/f1tenth_gym_ros)
-2. Clone this repository into your ROS2 workspace:
-```bash
-cd ~/your_ros2_workspace/src
-git clone https://github.com/yourusername/f1tenth_rl.git
-```
-3. Install Python dependencies:
-```bash
-pip install torch numpy matplotlib
-```
-4. Build the package:
-```bash
-cd ~/your_ros2_workspace
-colcon build --packages-select f1tenth_rl
-```
-
-## Usage
+See setup.md
 
 ### Training an RL Agent
 
 1. Start the F1TENTH simulator:
 ```bash
-source ~/your_ros2_workspace/install/setup.bash
+source /opt/ros/foxy/setup.bash
+source install/local_setup.bash
 ros2 launch f1tenth_gym_ros gym_bridge_launch.py
 ```
 
 2. In a new terminal, launch the RL agent in training mode:
 ```bash
-source ~/your_ros2_workspace/install/setup.bash
+source /opt/ros/foxy/setup.bash
+source install/local_setup.bash
 ros2 launch f1tenth_rl rl_agent_launch.py training_mode:=true model_type:=dqn
 ```
 
@@ -62,7 +47,8 @@ The agent will begin training and save model checkpoints periodically to the spe
 
 2. Launch the RL agent in deployment mode, providing the path to your trained model:
 ```bash
-source ~/your_ros2_workspace/install/setup.bash
+source /opt/ros/foxy/setup.bash
+source install/local_setup.bash
 ros2 launch f1tenth_rl rl_agent_launch.py training_mode:=false model_path:=/path/to/your/model.pt
 ```
 
@@ -71,7 +57,6 @@ ros2 launch f1tenth_rl rl_agent_launch.py training_mode:=false model_path:=/path
 You can modify the parameters in `config/agent_params.yaml` to adjust:
 - Training hyperparameters (learning rate, batch size, etc.)
 - Reward function components and weights
-- Network architecture settings
 
 ## Implementation Details
 
