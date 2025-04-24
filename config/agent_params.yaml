@@ -23,7 +23,7 @@ rl_agent:
     speed_reward_weight: 0.5
     steering_penalty_weight: -4.0
     progress_reward_weight: 10.0
-    centerline_reward_weight: 4.0
+    centerline_reward_weight: 100.0
 
     # Car starting position
     start_x: 0.0
