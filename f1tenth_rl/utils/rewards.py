@@ -77,13 +77,22 @@ def calculate_reward(scan, odom, prev_odom):
     # 6. Centerline following reward
     # Estimate distance to centerline using laser scan
     # Assuming forward-facing lidar with symmetric field of view
-    half_scan = len(scan.ranges) // 2
-    left_dist = scan.ranges[half_scan // 2]  # Left side distance
-    right_dist = scan.ranges[half_scan + half_scan // 2]  # Right side distance
-    
+    left_quarter = len(scan.ranges) // 4
+    right_quarter = 3 * len(scan.ranges) // 4
+    left_dists = scan.ranges[left_quarter-5:left_quarter+5]  # 10 points around left quarter
+    right_dists = scan.ranges[right_quarter-5:right_quarter+5]  # 10 points around right quarter
+
+    # Filter out inf values
+    left_dists = [d for d in left_dists if not math.isinf(d)]
+    right_dists = [d for d in right_dists if not math.isinf(d)]
+
+    # Get average distances (if lists aren't empty)
+    left_dist = sum(left_dists) / len(left_dists) if left_dists else 10.0
+    right_dist = sum(right_dists) / len(right_dists) if right_dists else 10.0
+        
     # Perfect centerline following would have equal distances on both sides
     centerline_error = abs(left_dist - right_dist)
-    centerline_reward = 0.5 * math.exp(-4.0 * centerline_error)  # Steeper falloff with error
+    centerline_reward = 1.0 * math.exp(-6.0 * centerline_error)  # Steeper falloff with error
     reward += centerline_reward
     
     return reward, done
