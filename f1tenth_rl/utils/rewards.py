@@ -83,7 +83,7 @@ def calculate_reward(scan, odom, prev_odom):
     
     # Perfect centerline following would have equal distances on both sides
     centerline_error = abs(left_dist - right_dist)
-    centerline_reward = 0.5 * math.exp(-2.0 * centerline_error)
+    centerline_reward = 0.5 * math.exp(-4.0 * centerline_error)  # Steeper falloff with error
     reward += centerline_reward
     
     return reward, done
