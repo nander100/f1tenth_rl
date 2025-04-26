@@ -11,7 +11,7 @@ rl_agent:
     
     # Farthest point parameters
     use_farthest_point: true  # Whether to use farthest point feature
-    farthest_point_noise: 0.1 # Noise level for farthest point steering suggestion
+    farthest_point_noise: 0.0 # Noise level for farthest point steering suggestion
     
     # DQN parameters
     hidden_dim: 256
