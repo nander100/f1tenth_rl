@@ -244,4 +244,6 @@ class PPOAgent:
             self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         else:
             raise ValueError(
-                f"Model
+                f"Model mismatch: Saved model use_farthest_point={saved_use_farthest_point}, "
+                f"but current setting is {self.use_farthest_point}"
+            )
