@@ -7,12 +7,13 @@ from nav_msgs.msg import Odometry
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import PoseWithCovarianceStamped
 import time
+from f1tenth_rl.utils.farthest_point import calculate_farthest_point_steering
 
 class F1TenthEnv:
     """
     Environment class that handles interaction with the F1TENTH simulator
     """
-    def __init__(self, node=None):
+    def __init__(self, node=None, use_farthest_point=True, farthest_point_noise=0.1):
         # Track dimensions (approximate values for typical F1TENTH tracks)
         self.track_width = 2.0  # meters
         
@@ -37,6 +38,10 @@ class F1TenthEnv:
         
         # Store the starting position
         self.start_position = [0.0, 0.0, 0.0]  # [x, y, theta]
+        
+        # Farthest point feature flag
+        self.use_farthest_point = use_farthest_point
+        self.farthest_point_noise = farthest_point_noise
         
         # Create reset publisher if node is provided
         if self.node is not None:
@@ -99,7 +104,7 @@ class F1TenthEnv:
             odom: Odometry message
             
         Returns:
-            next_state: current laser scan ranges
+            next_state: current laser scan ranges with farthest point steering
             reward: calculated reward
             done: whether episode is done
             info: additional information
@@ -133,6 +138,19 @@ class F1TenthEnv:
         ranges[np.isinf(ranges)] = 10.0  # Replace inf with large value
         state = ranges / 10.0  # Normalize to [0, 1]
         
+        # Calculate farthest point steering suggestion if enabled
+        if self.use_farthest_point:
+            farthest_steering, farthest_distance = calculate_farthest_point_steering(
+                scan, 
+                noise_level=self.farthest_point_noise
+            )
+            
+            # Normalize steering suggestion to [-1, 1]
+            normalized_steering = farthest_steering / 0.4
+            
+            # Add farthest point information to state
+            state = np.append(state, [normalized_steering, farthest_distance / 10.0])
+        
         # Additional info
         info = {
             'speed': current_speed,
@@ -140,6 +158,10 @@ class F1TenthEnv:
             'lap_progress': self.lap_progress,
             'lap_count': self.lap_count
         }
+        
+        if self.use_farthest_point:
+            info['farthest_steering'] = farthest_steering
+            info['farthest_distance'] = farthest_distance
         
         # Update previous values
         self.prev_speed = current_speed
