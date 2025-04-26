@@ -11,11 +11,18 @@ class DQNNetwork(nn.Module):
     """
     Deep Q-Network for F1TENTH reinforcement learning
     """
-    def __init__(self, state_dim, action_dim, hidden_dim=256):
+    def __init__(self, state_dim, action_dim, hidden_dim=256, use_farthest_point=True):
         super(DQNNetwork, self).__init__()
         
+        # Add input dimensions for farthest point features if enabled
+        self.use_farthest_point = use_farthest_point
+        input_dim = state_dim
+        if use_farthest_point:
+            # Add 2 more dimensions for steering suggestion and distance
+            input_dim += 2
+        
         self.network = nn.Sequential(
-            nn.Linear(state_dim, hidden_dim),
+            nn.Linear(input_dim, hidden_dim),
             nn.ReLU(),
             nn.Linear(hidden_dim, hidden_dim),
             nn.ReLU(),
@@ -29,13 +36,14 @@ class DQNAgent:
     """
     DQN Agent implementation for the F1TENTH simulator
     """
-    def __init__(self, state_dim, action_dim, hidden_dim=256, learning_rate=3e-4):
+    def __init__(self, state_dim, action_dim, hidden_dim=256, learning_rate=3e-4, use_farthest_point=True):
         self.state_dim = state_dim
         self.action_dim = action_dim
+        self.use_farthest_point = use_farthest_point
         
         # Create Q-networks (online and target)
-        self.q_network = DQNNetwork(state_dim, action_dim, hidden_dim)
-        self.target_network = DQNNetwork(state_dim, action_dim, hidden_dim)
+        self.q_network = DQNNetwork(state_dim, action_dim, hidden_dim, use_farthest_point)
+        self.target_network = DQNNetwork(state_dim, action_dim, hidden_dim, use_farthest_point)
         
         # Copy parameters from online to target network
         self.update_target_network()
@@ -123,14 +131,25 @@ class DQNAgent:
             'q_network_state_dict': self.q_network.state_dict(),
             'target_network_state_dict': self.target_network.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
-            'epsilon': self.epsilon
+            'epsilon': self.epsilon,
+            'use_farthest_point': self.use_farthest_point
         }, path)
     
     def load(self, path):
         """Load model from file"""
         checkpoint = torch.load(path)
         
-        self.q_network.load_state_dict(checkpoint['q_network_state_dict'])
-        self.target_network.load_state_dict(checkpoint['target_network_state_dict'])
-        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        self.epsilon = checkpoint['epsilon']
+        # Check if the saved model uses farthest point
+        saved_use_farthest_point = checkpoint.get('use_farthest_point', False)
+        
+        # Only load if configurations match or handle the mismatch
+        if saved_use_farthest_point == self.use_farthest_point:
+            self.q_network.load_state_dict(checkpoint['q_network_state_dict'])
+            self.target_network.load_state_dict(checkpoint['target_network_state_dict'])
+            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+            self.epsilon = checkpoint['epsilon']
+        else:
+            raise ValueError(
+                f"Model mismatch: Saved model use_farthest_point={saved_use_farthest_point}, "
+                f"but current setting is {self.use_farthest_point}"
+            )
