@@ -19,6 +19,7 @@ See setup.md
 
 1. Start the F1TENTH simulator:
 ```bash
+colcon build # build the workspsace
 source /opt/ros/foxy/setup.bash
 source install/local_setup.bash
 ros2 launch f1tenth_gym_ros gym_bridge_launch.py
