@@ -4,8 +4,9 @@ import numpy as np
 import math
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import Odometry
+from f1tenth_rl.utils.farthest_point import calculate_farthest_point_steering
 
-def calculate_reward(scan, odom, prev_odom):
+def calculate_reward(scan, odom, prev_odom, use_farthest_point=True, farthest_point_weight=0.5):
     """
     Calculate reward for the current state and action
     
@@ -13,6 +14,8 @@ def calculate_reward(scan, odom, prev_odom):
         scan: Current laser scan
         odom: Current odometry
         prev_odom: Previous odometry
+        use_farthest_point: Whether to include farthest point reward
+        farthest_point_weight: Weight for the farthest point steering component
         
     Returns:
         reward: Calculated reward value
@@ -94,6 +97,23 @@ def calculate_reward(scan, odom, prev_odom):
     centerline_error = abs(left_dist - right_dist)
     centerline_reward = 1.0 * math.exp(-6.0 * centerline_error)  # Steeper falloff with error
     reward += centerline_reward
+    
+    # 7. Farthest point steering reward (if enabled)
+    if use_farthest_point and farthest_point_weight > 0:
+        # Calculate the "natural" steering direction towards the farthest point
+        farthest_steering, _ = calculate_farthest_point_steering(scan, noise_level=0.0)
+        
+        # Extract current steering angle from the car
+        current_steering = steering_angle
+        
+        # Reward for steering towards the farthest point (or close to it)
+        # The closer the car's steering is to the farthest point direction, the higher the reward
+        steering_diff = abs(current_steering - farthest_steering)
+        
+        # Gaussian reward - highest when steering matches farthest point direction
+        # Lower as steering deviates
+        farthest_reward = farthest_point_weight * math.exp(-5.0 * steering_diff**2)
+        reward += farthest_reward
     
     return reward, done
 
