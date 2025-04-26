@@ -11,12 +11,19 @@ class ActorCritic(nn.Module):
     """
     Actor-Critic Network for PPO
     """
-    def __init__(self, state_dim, action_dim, hidden_dim=256):
+    def __init__(self, state_dim, action_dim, hidden_dim=256, use_farthest_point=True):
         super(ActorCritic, self).__init__()
+        
+        # Add input dimensions for farthest point features if enabled
+        self.use_farthest_point = use_farthest_point
+        input_dim = state_dim
+        if use_farthest_point:
+            # Add 2 more dimensions for steering suggestion and distance
+            input_dim += 2
         
         # Shared feature extractor
         self.feature_extractor = nn.Sequential(
-            nn.Linear(state_dim, hidden_dim),
+            nn.Linear(input_dim, hidden_dim),
             nn.ReLU()
         )
         
@@ -79,12 +86,13 @@ class PPOAgent:
     """
     Proximal Policy Optimization agent for F1TENTH
     """
-    def __init__(self, state_dim, action_dim, hidden_dim=256, lr=3e-4):
+    def __init__(self, state_dim, action_dim, hidden_dim=256, lr=3e-4, use_farthest_point=True):
         self.state_dim = state_dim
         self.action_dim = action_dim
+        self.use_farthest_point = use_farthest_point
         
         # Actor-Critic network
-        self.actor_critic = ActorCritic(state_dim, action_dim, hidden_dim)
+        self.actor_critic = ActorCritic(state_dim, action_dim, hidden_dim, use_farthest_point)
         
         # Optimizer
         self.optimizer = optim.Adam(self.actor_critic.parameters(), lr=lr)
@@ -219,11 +227,21 @@ class PPOAgent:
         """Save model to file"""
         torch.save({
             'actor_critic_state_dict': self.actor_critic.state_dict(),
-            'optimizer_state_dict': self.optimizer.state_dict()
+            'optimizer_state_dict': self.optimizer.state_dict(),
+            'use_farthest_point': self.use_farthest_point
         }, path)
     
     def load(self, path):
         """Load model from file"""
         checkpoint = torch.load(path)
-        self.actor_critic.load_state_dict(checkpoint['actor_critic_state_dict'])
-        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        
+        # Check if the saved model uses farthest point
+        saved_use_farthest_point = checkpoint.get('use_farthest_point', False)
+        
+        # Only load if configurations match or handle the mismatch
+        if saved_use_farthest_point == self.use_farthest_point:
+            self.actor_critic.load_state_dict(checkpoint['actor_critic_state_dict'])
+            self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        else:
+            raise ValueError(
+                f"Model
