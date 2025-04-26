@@ -127,7 +127,12 @@ class F1TenthEnv:
         collision_penalty = -100.0 if collision else 0.0
         
         # Combine reward components
-        reward = speed_reward + steering_penalty + progress_reward + collision_penalty
+        reward_calc = RewardCalculator(
+            collision_penalty=-500.0,
+            speed_reward_weight=0.3,
+            progress_reward_weight=5.0,
+            
+        )
         
         # Check if episode is done
         self.episode_step += 1
