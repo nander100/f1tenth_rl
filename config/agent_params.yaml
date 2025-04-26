@@ -9,6 +9,10 @@ rl_agent:
     # Environment parameters
     max_steps_per_episode: 1000
     
+    # Farthest point parameters
+    use_farthest_point: true  # Whether to use farthest point feature
+    farthest_point_noise: 0.1 # Noise level for farthest point steering suggestion
+    
     # DQN parameters
     hidden_dim: 256
     learning_rate: 0.0001
@@ -24,6 +28,7 @@ rl_agent:
     steering_penalty_weight: -10.0
     progress_reward_weight: 5.0
     centerline_reward_weight: 25.0
+    farthest_point_weight: 1.0  # Weight for farthest point steering reward
 
     # Car starting position
     start_x: 0.0
