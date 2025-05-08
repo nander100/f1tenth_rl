@@ -30,7 +30,7 @@ ros2 launch f1tenth_gym_ros gym_bridge_launch.py
 source /opt/ros/foxy/setup.bash
 source install/local_setup.bash
 ros2 launch f1tenth_rl rl_agent_launch.py training_mode:=true model_type:=dqn
-```
+``` 
 
 The agent will begin training and save model checkpoints periodically to the specified `save_path` (default: `models/`).
 
